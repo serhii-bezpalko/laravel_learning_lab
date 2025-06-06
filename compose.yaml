@@ -34,6 +34,8 @@ services:
     environment:
       - MYSQL_DATABASE=laravel_learning_lab
       - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./mysql-data-development:/var/lib/mysql
     networks:
       - laravel-development
   composer:

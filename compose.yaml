@@ -1,0 +1,51 @@
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/config.d/:/etc/nginx/conf.d/
+    ports:
+      - "8080:80"
+    container_name: nginx
+    networks:
+      - laravel-development
+    depends_on:
+      php-fpm:
+        condition: service_started
+  php-fpm:
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www
+    container_name: php-fpm
+    user: "1000:1000"
+    networks:
+      - laravel-development
+    depends_on:
+      mysql:
+        condition: service_started
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=laravel_learning_lab
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - laravel-development
+  composer:
+    image: composer:latest
+    container_name: composer-installer
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: ["composer", "install"]
+    depends_on:
+      php-fpm:
+        condition: service_started
+
+networks:
+  laravel-development:

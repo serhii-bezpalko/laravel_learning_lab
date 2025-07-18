@@ -32,7 +32,7 @@ services:
     ports:
       - "3307:3306"
     environment:
-      - MYSQL_DATABASE=laravel_learning_lab
+      - MYSQL_DATABASE=books
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - ./mysql-data-development:/var/lib/mysql

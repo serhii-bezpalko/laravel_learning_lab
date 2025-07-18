@@ -1,7 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthorController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return "hello";
-});
+Route::resource('authors', AuthorController::class);

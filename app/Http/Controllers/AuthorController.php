@@ -15,7 +15,7 @@ class AuthorController extends Controller
      */
     public function index(): View
     {
-        return view("authors", ["authors" => Author::all()]);
+        return view("authors.index", ["authors" => Author::all()]);
     }
 
     /**
@@ -23,7 +23,7 @@ class AuthorController extends Controller
      */
     public function create(): View
     {
-        return view('create_author');
+        return view('authors.create');
     }
 
     /**
@@ -31,7 +31,7 @@ class AuthorController extends Controller
      */
     public function store(StoreAuthorRequest $request): RedirectResponse
     {
-        $author = Author::create($request->validated());
+        Author::create($request->validated());
         return to_route('authors.index');
     }
 
@@ -46,24 +46,26 @@ class AuthorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Author $author)
+    public function edit(Author $author): View
     {
-        //
+        return view('authors.edit', compact('author'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAuthorRequest $request, Author $author)
+    public function update(UpdateAuthorRequest $request, Author $author): RedirectResponse
     {
-        //
+        $author->update($request->validated());
+        return to_route('authors.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Author $author)
+    public function destroy(Author $author): RedirectResponse
     {
-        dd($author);
+        $author->delete();
+        return to_route('authors.index');
     }
 }

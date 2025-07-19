@@ -65,6 +65,7 @@ class AuthorController extends Controller
      */
     public function destroy(Author $author): RedirectResponse
     {
+        $author->books()->sync([]);
         $author->delete();
         return to_route('authors.index');
     }

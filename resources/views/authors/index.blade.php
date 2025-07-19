@@ -24,13 +24,15 @@
             <td style="display: table-cell">{{ $author->name }}</td>
             <td>{{ $author->patronymic }}</td>
             <td>
+                <form method="GET" action="{{ route('authors.edit', $author) }}">
+                    <button type="submit">Edit</button>
+                </form>
+            </td>
+            <td>
                 <form method="POST" action="{{ route('authors.destroy', $author) }}">
                     @method('DELETE')
                     @csrf
                     <button type="submit">Delete</button>
-                </form>
-                <form method="GET" action="{{ route('authors.edit', $author) }}">
-                    <button type="submit">Edit</button>
                 </form>
             </td>
         </tr>

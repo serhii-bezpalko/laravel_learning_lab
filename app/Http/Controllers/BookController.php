@@ -8,6 +8,7 @@ use App\Models\Author;
 use App\Models\Book;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -16,9 +17,20 @@ class BookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view("books.index", ["books" => Book::paginate(15)]);
+        $orderBy = $request->get("sort", "asc");
+        $title = $request->get("title");
+        $author = $request->get("author");
+        $books = Book::query()
+            ->when($title, fn ($q, $title) => $q->where("title", $title))
+            ->when($author, fn ($q, $author) => $q->whereHas('authors', fn($q) => $q->where("surname", $author)))
+            ->orderBy("title", $orderBy)
+            ->paginate(1)
+            ->appends(["sort" => $orderBy,
+                "title" => $title,
+                "author" => $author]);
+        return view("books.index", compact("books", "orderBy", "title", "author"));
     }
 
     /**
@@ -41,7 +53,6 @@ class BookController extends Controller
         } else {
             $book->cover = 'default.jpg';
         }
-
         $book->authors()->attach($request["authors"]);
         $book->save();
         return to_route("books.index");

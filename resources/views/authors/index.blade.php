@@ -6,9 +6,23 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Authors</title>
+    <link rel="stylesheet" href="{{ asset("assets/css/main.css") }}">
 </head>
 <body>
+<button onclick="location.href='{{ route('index') }}'" type="button">Index</button>
+<button onclick="location.href='{{ route('authors.index') }}'" type="button">Authors</button>
+<button onclick="location.href='{{ route('books.index') }}'" type="button">Books</button>
 <button onclick="location.href='{{ route('authors.create') }}'" type="button">Add author</button>
+<button onclick="location.href='{{ route('authors.index', ["sort" => $orderBy === "asc" ? "desc" : "asc", "surname" => $surname, "name" => $name ]) }}'" type="button">
+    {{ $orderBy === "asc" ? "Z-A" : "A-Z" }}
+</button>
+<form method="GET" action="{{ route("authors.index") }}">
+    <label for="surname">Surname:</label>
+    <input type="text" name="surname" value="{{ $surname }}">
+    <label for="name">Name:</label>
+    <input type="text" name="name" value="{{ $name }}">
+    <button type="submit">Search</button>
+</form>
 <table>
     <thead>
     <tr>
@@ -39,5 +53,6 @@
     @endforeach
     </tbody>
 </table>
+{{ $authors->links("vendor.pagination.default") }}
 </body>
 </html>

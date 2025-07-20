@@ -6,6 +6,7 @@ use App\Http\Requests\StoreAuthorRequest;
 use App\Http\Requests\UpdateAuthorRequest;
 use App\Models\Author;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AuthorController extends Controller
@@ -13,9 +14,18 @@ class AuthorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view("authors.index", ["authors" => Author::all()]);
+        $orderBy = $request->get("sort", "asc");
+        $surname = $request->get("surname");
+        $name = $request->get("name");
+        $authors = Author::query()
+            ->when($surname, fn($q, $surname) => $q->where("surname", $surname))
+            ->when($name, fn($q, $name) => $q->where("name", $name))
+            ->orderBy("surname", $orderBy)
+            ->paginate(15)
+            ->appends(["sort" => $orderBy, "surname" => $surname, "name" => $name]);
+        return view("authors.index", compact("authors", "orderBy", "surname", "name"));
     }
 
     /**

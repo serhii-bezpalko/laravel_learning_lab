@@ -22,3 +22,8 @@ h1 {
 .pagination li {
     display: inline;
 }
+
+body {
+    width: 80%;
+    margin: auto;
+}

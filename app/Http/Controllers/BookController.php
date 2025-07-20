@@ -6,7 +6,9 @@ use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Models\Author;
 use App\Models\Book;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class BookController extends Controller
@@ -16,7 +18,7 @@ class BookController extends Controller
      */
     public function index(): View
     {
-        return view("books.index", ["books" => Book::all()]);
+        return view("books.index", ["books" => Book::paginate(15)]);
     }
 
     /**
@@ -34,6 +36,12 @@ class BookController extends Controller
     public function store(StoreBookRequest $request): RedirectResponse
     {
         $book = Book::create($request->validated());
+        if ($request->hasFile('cover')) {
+            $this->saveImage($request, $book);
+        } else {
+            $book->cover = 'default.jpg';
+        }
+
         $book->authors()->attach($request["authors"]);
         $book->save();
         return to_route("books.index");
@@ -61,9 +69,14 @@ class BookController extends Controller
      */
     public function update(UpdateBookRequest $request, Book $book): RedirectResponse
     {
-        $book->update($request->validated());
+        $book->update($request->safe()->except(["cover"]));
+        if ($request->hasFile("cover")) {
+            $this->saveImage($request, $book);
+        }
+        $book->save();
         $book->authors()->sync($request["authors"]);
         return to_route("books.index");
+        // вынести в отдельную функцию блок иф, заменить update и сохранять 1 раз в конце
     }
 
     /**
@@ -71,8 +84,20 @@ class BookController extends Controller
      */
     public function destroy(Book $book): RedirectResponse
     {
-        $book->authors()->sync([]);
+        $book->authors()->detach();
+        if ($book->cover != "default.jpg") {
+            Storage::disk("public")->delete("images/" . $book->cover);
+        }
         $book->delete();
         return to_route("books.index");
+    }
+
+    public function saveImage(FormRequest $request, Book $book): void
+    {
+        $cover = $request->cover;
+        $extension = $cover->extension();
+        $fileName = uniqid() . "." . $extension;
+        $request->file('cover')->storePubliclyAs('images/', $fileName, 'public');
+        $book->cover = $fileName;
     }
 }

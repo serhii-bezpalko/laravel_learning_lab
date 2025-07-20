@@ -8,10 +8,12 @@
     <title>Create book</title>
 </head>
 <body>
-<form method="POST" action="{{ route('books.store') }}">
+<form method="POST" action="{{ route('books.store') }}" enctype="multipart/form-data">
     @csrf
     <label for="title">Title</label><br>
     <input name="title" type="text"><br>
+    <label for="cover">Select cover</label><br>
+    <input type="file" name="cover" accept="image/*"/><br>
     <label for="description">Description</label><br>
     <textarea name="description"></textarea><br>
     <select name="authors[]" multiple>

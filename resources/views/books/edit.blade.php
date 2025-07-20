@@ -8,11 +8,13 @@
     <title>{{ $book->title }}</title>
 </head>
 <body>
-<form method="POST" action="{{ route('books.update', $book) }}">
+<form method="POST" action="{{ route('books.update', $book) }}" enctype="multipart/form-data">
     @method('PUT')
     @csrf
     <label for="title">Title</label><br>
     <input name="title" type="text" value="{{ $book->title }}"><br>
+    <label for="cover">Select cover</label><br>
+    <input type="file" name="cover" accept="image/*"/><br>
     <label for="description">Description</label><br>
     <textarea name="description">{{ $book->description }}</textarea><br>
     <select name="authors[]" multiple>

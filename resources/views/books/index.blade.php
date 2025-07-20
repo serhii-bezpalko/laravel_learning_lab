@@ -13,6 +13,7 @@
 <div class="books">
     @foreach($books as $book)
         <div id="{{ "book_" . $book->id }}" class="book">
+            <img src="{{ asset("/storage/images/" . $book->cover) }}" alt="book cover">
             <h1>{{ $book->title }}</h1>
             <p>{{ $book->description }}</p>
             <p>Authors:</p>
@@ -32,6 +33,6 @@
         </div>
     @endforeach
 </div>
-
+{{ $books->links("vendor.pagination.default") }}
 </body>
 </html>

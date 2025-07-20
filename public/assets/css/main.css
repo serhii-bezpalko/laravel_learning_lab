@@ -6,6 +6,19 @@
     list-style: inside;
 }
 
+.book img {
+    height: 300px;
+    width: 200px;
+}
+
 h1 {
     font-size: 22px;
+}
+
+.pagination {
+    text-align: center;
+}
+
+.pagination li {
+    display: inline;
 }

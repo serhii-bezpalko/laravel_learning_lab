@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\File;
 
 class StoreBookRequest extends FormRequest
 {
@@ -24,6 +25,8 @@ class StoreBookRequest extends FormRequest
         return [
             "title" => "required|string",
             "description" => "string|nullable",
+            "cover" => [File::types(['png', 'jpg'])->max(2048)],
+            "authors" => "required",
         ];
     }
 }

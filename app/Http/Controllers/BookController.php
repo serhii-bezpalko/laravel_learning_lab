@@ -7,7 +7,7 @@ use App\Http\Requests\UpdateBookRequest;
 use App\Models\Author;
 use App\Models\Book;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -17,7 +17,7 @@ class BookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $orderBy = $request->get("sort", "asc");
         $title = $request->get("title");
@@ -26,11 +26,20 @@ class BookController extends Controller
             ->when($title, fn ($q, $title) => $q->where("title", $title))
             ->when($author, fn ($q, $author) => $q->whereHas('authors', fn($q) => $q->where("surname", $author)))
             ->orderBy("title", $orderBy)
-            ->paginate(1)
+            ->paginate(15)
             ->appends(["sort" => $orderBy,
                 "title" => $title,
                 "author" => $author]);
-        return view("books.index", compact("books", "orderBy", "title", "author"));
+        $authors = Author::all();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'list' => view('books.list', compact('books'))->render(),
+                'pagination' => $books->links()->render()
+            ]);
+        }
+
+        return view("books.index", compact("books", "orderBy", "title", "author", "authors"));
     }
 
     /**
@@ -38,14 +47,14 @@ class BookController extends Controller
      */
     public function create(): View
     {
-        $authors = Author::all();
+        $authors = Author::query()->paginate(1);
         return view("books.create", compact("authors"));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreBookRequest $request): RedirectResponse
+    public function store(StoreBookRequest $request): JsonResponse
     {
         $book = Book::create($request->validated());
         if ($request->hasFile('cover')) {
@@ -55,7 +64,7 @@ class BookController extends Controller
         }
         $book->authors()->attach($request["authors"]);
         $book->save();
-        return to_route("books.index");
+        return response()->json();
     }
 
     /**
@@ -78,7 +87,7 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBookRequest $request, Book $book): RedirectResponse
+    public function update(UpdateBookRequest $request, Book $book): JsonResponse
     {
         $book->update($request->safe()->except(["cover"]));
         if ($request->hasFile("cover")) {
@@ -86,21 +95,20 @@ class BookController extends Controller
         }
         $book->save();
         $book->authors()->sync($request["authors"]);
-        return to_route("books.index");
-        // вынести в отдельную функцию блок иф, заменить update и сохранять 1 раз в конце
+        return response()->json(['book' => view('books._book', compact('book'))->render()]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Book $book): RedirectResponse
+    public function destroy(Book $book): JsonResponse
     {
         $book->authors()->detach();
         if ($book->cover != "default.jpg") {
             Storage::disk("public")->delete("images/" . $book->cover);
         }
         $book->delete();
-        return to_route("books.index");
+        return response()->json();
     }
 
     public function saveImage(FormRequest $request, Book $book): void
